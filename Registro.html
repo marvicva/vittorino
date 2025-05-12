@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrazione utente</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/css/bootstrap.min.css">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- Custom CSS -->
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .header {
+            background-color: #343a40;
+            color: white;
+            padding: 1.5rem 0;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .card {
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            background-color: #0069d9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary {
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+        }
+
+        .form-control:focus {
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        .input-group-text {
+            background-color: #f8f9fa;
+            border-right: none;
+        }
+
+        .form-control {
+            border-left: none;
+        }
+
+        .was-validated .form-control:invalid {
+            border-color: #dc3545;
+            padding-right: calc(1.5em + .75rem);
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23dc3545' viewBox='0 0 12 12'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(.375em + .1875rem) center;
+            background-size: calc(.75em + .375rem) calc(.75em + .375rem);
+        }
+
+        .was-validated .form-control:valid {
+            border-color: #28a745;
+            padding-right: calc(1.5em + .75rem);
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3e%3cpath fill='%2328a745' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(.375em + .1875rem) center;
+            background-size: calc(.75em + .375rem) calc(.75em + .375rem);
+        }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .breadcrumb {
+            background-color: transparent;
+            padding-left: 0;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+
+        .step {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            position: relative;
+        }
+
+        .step.active {
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .step:not(:last-child):after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: -50%;
+            width: 100%;
+            height: 2px;
+            background-color: #e9ecef;
+            z-index: 1;
+        }
+
+        .step.completed:not(:last-child):after {
+            background-color: #28a745;
+        }
+
+        .step-number {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #e9ecef;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            z-index: 2;
+            position: relative;
+        }
+
+        .step.active .step-number {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .step.completed .step-number {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .step.completed .step-number:after {
+            content: '✓';
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1><i class="fas fa-user-edit mr-2"></i>Registrazione utente</h1>
+                </div>
+                <div class="col-md-6 text-md-right">
+                    <span id="fecha-actual" class="text-light"></span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="inicio.html"><i class="fas fa-home mr-1"></i>Inicio</a></li>
+                <li class="breadcrumb-item active" aria-current="page" id="breadcrumb-action">Nuevo Usuario</li>
+            </ol>
+        </nav>
+
+        <!-- Step Indicator -->
+        <div class="step-indicator">
+            <div class="step active" id="step1">
+                <div class="step-number">1</div>
+                <div class="step-title">Informazioni personali</div>
+            </div>
+            <div class="step" id="step2">
+                <div class="step-number">2</div>
+                <div class="step-title">Contatto</div>
+            </div>
+            <div class="step" id="step3">
+                <div class="step-number">3</div>
+                <div class="step-title">Conferma</div>
+            </div>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="loadingSpinner" class="loading-spinner">
+            <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Ricarica...</span>
+            </div>
+            <p class="mt-2">Elaborazione dei dati...</p>
+        </div>
+
+        <!-- Form Card -->
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 id="form-title"><i class="fas fa-user-plus mr-2"></i>Nuovo utente</h5>
+            </div>
+            <div class="card-body">
+                <form id="usuarioForm" class="needs-validation" novalidate>
+                    <!-- Step 1: Información Personal -->
+                    <div id="form-step-1">
+                        <div class="form-group">
+                            <label for="DocumentoIdentidad">Identità<span
+                                    class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="fas fa-id-card"></i></span>
+                                </div>
+                                <input type="text" class="form-control" id="DocumentoIdentidad"
+                                    name="DocumentoIdentidad" placeholder="Ingrese número de documento" required>
+                                <div class="invalid-feedback">
+                                    Inserisci un documento d'identità valido.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="Nombres">Nomi completi<span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                </div>
+                                <input type="text" class="form-control" id="Nombres" name="Nombres"
+                                    placeholder="Ingrese nombres completos" required>
+                                <div class="invalid-feedback">
+                                    Inserisci i nomi completi.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group text-right">
+                            <button type="button" class="btn btn-primary" id="btn-step-1">
+                                Seguente <i class="fas fa-arrow-right ml-2"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Contacto -->
+                    <div id="form-step-2" style="display: none;">
+                        <div class="form-group">
+                            <label for="Telefono">Telefono</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="fas fa-phone-alt"></i></span>
+                                </div>
+                                <input type="tel" class="form-control" id="Telefono" name="Telefono"
+                                    placeholder="Ingrese número de teléfono">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="Correo">E-mail <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                </div>
+                                <input type="email" class="form-control" id="Correo" name="Correo"
+                                    placeholder="Ingrese correo electrónico" required>
+                                <div class="invalid-feedback">
+                                    Si prega di inserire un indirizzo email valido.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="Ciudad">Città</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="fas fa-city"></i></span>
+                                </div>
+                                <input type="text" class="form-control" id="Ciudad" name="Ciudad"
+                                    placeholder="Ingrese ciudad">
+                            </div>
+                        </div>
+                        <div class="form-group text-right">
+                            <button type="button" class="btn btn-secondary mr-2" id="btn-back-step-1">
+                                <i class="fas fa-arrow-left mr-2"></i> Prima
+                            </button>
+                            <button type="button" class="btn btn-primary" id="btn-step-2">
+                                Seguente <i class="fas fa-arrow-right ml-2"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Confirmación -->
+                    <div id="form-step-3" style="display: none;">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle mr-2"></i> Si prega di rivedere i dati prima di salvare.
+                        </div>
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h6 class="mb-0">Riepilogo dei dati</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-2">
+                                    <div class="col-md-4 font-weight-bold">Identità:</div>
+                                    <div class="col-md-8" id="resumen-documento"></div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-md-4 font-weight-bold">Nomi completi:</div>
+                                    <div class="col-md-8" id="resumen-nombres"></div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-md-4 font-weight-bold">Telefono:</div>
+                                    <div class="col-md-8" id="resumen-telefono"></div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-md-4 font-weight-bold">E-mail:</div>
+                                    <div class="col-md-8" id="resumen-correo"></div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-md-4 font-weight-bold">Città:</div>
+                                    <div class="col-md-8" id="resumen-ciudad"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group text-right">
+                            <button type="button" class="btn btn-secondary mr-2" id="btn-back-step-2">
+                                <i class="fas fa-arrow-left mr-2"></i> Prima
+                            </button>
+                            <button type="submit" class="btn btn-success" id="btnGuardar">
+                                <i class="fas fa-save mr-2"></i> Salva utente
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Hidden ID field for updates -->
+                    <input type="hidden" id="IdUsuario" name="IdUsuario">
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="successModalLabel">¡Operazione riuscita!</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                    </div>
+                    <p class="text-center" id="successMessage">L'utente è stato salvato correttamente.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="btnGoToList">
+                        <i class="fas fa-list mr-2"></i> Vai all'elenco
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="btnRegisterAnother">
+                        <i class="fas fa-user-plus mr-2"></i> Registra altro
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Modal -->
+    <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="errorModalLabel">Errore</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-exclamation-triangle text-danger" style="font-size: 4rem;"></i>
+                    </div>
+                    <p class="text-center" id="errorMessage">Si è verificato un errore durante l'elaborazione della richiesta.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery, Popper.js, and Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.1/umd/popper.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/js/bootstrap.min.js"></script>
+
+    <!-- Application JavaScript -->
+    <script>
+        // Variables globales
+        let editMode = false;
+        let userId = null;
+
+        // Inicialización
+        window.onload = function () {
+            actualizarFecha();
+            setInterval(actualizarFecha, 60000);
+            setupFormNavigation();
+            checkForEditMode();
+        };
+
+        // Actualizar fecha y hora
+        function actualizarFecha() {
+            const ahora = new Date();
+            const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+            document.getElementById('fecha-actual').textContent = ahora.toLocaleDateString('es-ES', opciones);
+        }
+
+        // Configurar navegación del formulario
+        function setupFormNavigation() {
+            // Step 1 to Step 2
+            document.getElementById('btn-step-1').addEventListener('click', function () {
+                if (validateStep1()) {
+                    document.getElementById('form-step-1').style.display = 'none';
+                    document.getElementById('form-step-2').style.display = 'block';
+                    updateStepIndicator(2);
+                }
+            });
+
+            // Step 2 to Step 1
+            document.getElementById('btn-back-step-1').addEventListener('click', function () {
+                document.getElementById('form-step-2').style.display = 'none';
+                document.getElementById('form-step-1').style.display = 'block';
+                updateStepIndicator(1);
+            });
+
+            // Step 2 to Step 3
+            document.getElementById('btn-step-2').addEventListener('click', function () {
+                if (validateStep2()) {
+                    updateResumenData();
+                    document.getElementById('form-step-2').style.display = 'none';
+                    document.getElementById('form-step-3').style.display = 'block';
+                    updateStepIndicator(3);
+                }
+            });
+
+            // Step 3 to Step 2
+            document.getElementById('btn-back-step-2').addEventListener('click', function () {
+                document.getElementById('form-step-3').style.display = 'none';
+                document.getElementById('form-step-2').style.display = 'block';
+                updateStepIndicator(2);
+            });
+
+            // Form submission
+            document.getElementById('usuarioForm').addEventListener('submit', function (e) {
+                e.preventDefault();
+                if (validateForm()) {
+                    submitForm();
+                }
+            });
+
+            // Modal buttons
+            document.getElementById('btnGoToList').addEventListener('click', function () {
+                window.location = "inicio.html";
+            });
+
+            document.getElementById('btnRegisterAnother').addEventListener('click', function () {
+                $('#successModal').modal('hide');
+                resetForm();
+            });
+        }
+
+        // Actualizar indicador de pasos
+        function updateStepIndicator(step) {
+            // Reset all steps
+            document.querySelectorAll('.step').forEach(function (item) {
+                item.classList.remove('active', 'completed');
+            });
+
+            // Set active step
+            document.getElementById('step' + step).classList.add('active');
+
+            // Set completed steps
+            for (let i = 1; i < step; i++) {
+                document.getElementById('step' + i).classList.add('completed');
+            }
+        }
+
+        // Validar paso 1
+        function validateStep1() {
+            const documentoInput = document.getElementById('DocumentoIdentidad');
+            const nombresInput = document.getElementById('Nombres');
+
+            if (!documentoInput.value.trim()) {
+                showFieldError(documentoInput, 'Por favor ingrese un documento de identidad válido.');
+                return false;
+            }
+
+            if (!nombresInput.value.trim()) {
+                showFieldError(nombresInput, 'Por favor ingrese nombres completos.');
+                return false;
+            }
+
+            return true;
+        }
+
+        // Validar paso 2
+        function validateStep2() {
+            const correoInput = document.getElementById('Correo');
+
+            if (!correoInput.value.trim()) {
+                showFieldError(correoInput, 'Por favor ingrese un correo electrónico válido.');
+                return false;
+            }
+
+            // Validar formato de correo
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(correoInput.value.trim())) {
+                showFieldError(correoInput, 'Por favor ingrese un correo electrónico válido.');
+                return false;
+            }
+
+            return true;
+        }
+
+        // Mostrar error en campo
+        function showFieldError(field, message) {
+            field.classList.add('is-invalid');
+
+            // Get or create feedback div
+            let feedback = field.nextElementSibling;
+            if (!feedback || !feedback.classList.contains('invalid-feedback')) {
+                feedback = document.createElement('div');
+                feedback.className = 'invalid-feedback';
+                field.parentNode.appendChild(feedback);
+            }
+
+            feedback.textContent = message;
+            field.focus();
+        }
+
+        // Actualizar datos de resumen
+        function updateResumenData() {
+            document.getElementById('resumen-documento').textContent = document.getElementById('DocumentoIdentidad').value;
+            document.getElementById('resumen-nombres').textContent = document.getElementById('Nombres').value;
+
+            const telefono = document.getElementById('Telefono').value;
+            document.getElementById('resumen-telefono').textContent = telefono ? telefono : 'No especificado';
+
+            document.getElementById('resumen-correo').textContent = document.getElementById('Correo').value;
+
+            const ciudad = document.getElementById('Ciudad').value;
+            document.getElementById('resumen-ciudad').textContent = ciudad ? ciudad : 'No especificado';
+        }
+
+        // Validar formulario completo
+        function validateForm() {
+            return validateStep1() && validateStep2();
+        }
+
+        // Enviar formulario
+        function submitForm() {
+            const usuario = {
+                IdUsuario: document.getElementById('IdUsuario').value || 0,
+                DocumentoIdentidad: document.getElementById('DocumentoIdentidad').value,
+                Nombres: document.getElementById('Nombres').value,
+                Telefono: document.getElementById('Telefono').value,
+                Correo: document.getElementById('Correo').value,
+                Ciudad: document.getElementById('Ciudad').value
+            };
+
+            showLoadingSpinner();
+
+            if (editMode) {
+                // Actualizar usuario existente
+                $.ajax({
+                    url: 'http://localhost:58683/api/usuario/' + usuario.IdUsuario,
+                    type: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify(usuario),
+                    success: function (response) {
+                        hideLoadingSpinner();
+                        if (response) {
+                            document.getElementById('successMessage').textContent = 'El usuario se ha actualizado correctamente.';
+                            $('#successModal').modal('show');
+                        } else {
+                            showErrorModal('Error al actualizar el usuario.');
+                        }
+                    },
+                    error: function (error) {
+                        hideLoadingSpinner();
+                        console.error('Error actualizando usuario:', error);
+                        showErrorModal('Error al actualizar el usuario.');
+                    }
+                });
+            } else {
+                // Crear nuevo usuario
+                $.ajax({
+                    url: 'http://localhost:58683/api/usuario/',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(usuario),
+                    success: function (response) {
+                        hideLoadingSpinner();
+                        if (response) {
+                            document.getElementById('successMessage').textContent = 'El usuario se ha creado correctamente.';
+                            $('#successModal').modal('show');
+                        } else {
+                            showErrorModal('Error al crear el usuario.');
+                        }
+                    },
+                    error: function (error) {
+                        hideLoadingSpinner();
+                        console.error('Error creando usuario:', error);
+                        showErrorModal('Error al crear el usuario.');
+                    }
+                });
+            }
+        }
+
+        // Mostrar spinner de carga
+        function showLoadingSpinner() {
+            document.getElementById('loadingSpinner').style.display = 'block';
+            document.querySelector('.card').style.opacity = '0.5';
+        }
+
+        // Ocultar spinner de carga
+        function hideLoadingSpinner() {
+            document.getElementById('loadingSpinner').style.display = 'none';
+            document.querySelector('.card').style.opacity = '1';
+        }
+
+        // Mostrar modal de error
+        function showErrorModal(message) {
+            document.getElementById('errorMessage').textContent = message;
+            $('#errorModal').modal('show');
+        }
+
+        // Resetear formulario
+        function resetForm() {
+            document.getElementById('usuarioForm').reset();
+            document.getElementById('IdUsuario').value = '';
+            editMode = false;
+
+            // Volver al paso 1
+            document.getElementById('form-step-1').style.display = 'block';
+            document.getElementById('form-step-2').style.display = 'none';
+            document.getElementById('form-step-3').style.display = 'none';
+            updateStepIndicator(1);
+
+            // Actualizar título
+            document.getElementById('form-title').innerHTML = '<i class="fas fa-user-plus mr-2"></i>Nuevo Usuario';
+            document.getElementById('breadcrumb-action').textContent = 'Nuevo Usuario';
+        }
+
+        // Verificar si estamos en modo edición
+        function checkForEditMode() {
+            const urlParams = new URLSearchParams(window.location.search);
+            userId = urlParams.get('id');
+
+            if (userId) {
+                // Estamos en modo edición
+                editMode = true;
+                document.getElementById('form-title').innerHTML = '<i class="fas fa-user-edit mr-2"></i>Editar Usuario';
+                document.getElementById('breadcrumb-action').textContent = 'Editar Usuario';
+                cargarDatosUsuario(userId);
+            }
+        }
+
+        // Cargar datos del usuario para edición
+        function cargarDatosUsuario(id) {
+            showLoadingSpinner();
+
+            $.get('http://localhost:58683/api/usuario/' + id)
+                .done(function (usuario) {
+                    document.getElementById('IdUsuario').value = usuario.IdUsuario;
+                    document.getElementById('DocumentoIdentidad').value = usuario.DocumentoIdentidad;
+                    document.getElementById('Nombres').value = usuario.Nombres;
+                    document.getElementById('Telefono').value = usuario.Telefono || '';
+                    document.getElementById('Correo').value = usuario.Correo || '';
+                    document.getElementById('Ciudad').value = usuario.Ciudad || '';
+
+                    hideLoadingSpinner();
+                })
+                .fail(function (error) {
+                    console.error('Error cargando datos del usuario:', error);
+                    hideLoadingSpinner();
+                    showErrorModal('Error al cargar los datos del usuario.');
+                });
+        }
+    </script>
+</body>
+
+</html>
