@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión de Usuarios</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/css/bootstrap.min.css">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- Custom CSS -->
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .header {
+            background-color: #343a40;
+            color: white;
+            padding: 1.5rem 0;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .card {
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            background-color: #0069d9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-success {
+            transition: all 0.2s;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            transition: all 0.2s;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+        }
+
+        .table {
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .table thead {
+            background-color: #343a40;
+            color: white;
+        }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .no-data-message {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+            font-style: italic;
+            color: #6c757d;
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-box input {
+            padding-left: 40px;
+            border-radius: 20px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 10px;
+            color: #6c757d;
+        }
+
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+
+        .modal-confirm {
+            color: #636363;
+            width: 400px;
+        }
+
+        .modal-confirm .modal-content {
+            padding: 20px;
+            border-radius: 5px;
+            border: none;
+            text-align: center;
+        }
+
+        .modal-confirm .modal-header {
+            border-bottom: none;
+            position: relative;
+        }
+
+        .modal-confirm h4 {
+            text-align: center;
+            font-size: 26px;
+            margin: 30px 0 -10px;
+        }
+
+        .modal-confirm .close {
+            position: absolute;
+            top: -5px;
+            right: -2px;
+        }
+
+        .modal-confirm .modal-body {
+            color: #999;
+        }
+
+        .modal-confirm .modal-footer {
+            border: none;
+            text-align: center;
+            border-radius: 5px;
+            padding: 10px 15px 25px;
+        }
+
+        .modal-confirm .btn-secondary {
+            background: #c1c1c1;
+        }
+
+        .modal-confirm .icon-box {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto;
+            border-radius: 50%;
+            z-index: 9;
+            text-align: center;
+            border: 3px solid #f15e5e;
+        }
+
+        .modal-confirm .icon-box i {
+            color: #f15e5e;
+            font-size: 46px;
+            display: inline-block;
+            margin-top: 13px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1><i class="fas fa-users mr-2"></i>Sistema di Gestione Degli Utenti</h1>
+                </div>
+                <div class="col-md-6 text-md-right">
+                    <span id="fecha-actual" class="text-light"></span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Actions Row -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <button type="button" class="btn btn-primary" onclick="IrFormularioCrear()">
+                    <i class="fas fa-user-plus mr-2"></i>Crea Nuovo Utente
+                </button>
+            </div>
+            <div class="col-md-8">
+                <div class="search-box">
+                    <span class="search-icon"><i class="fas fa-search"></i></span>
+                    <input type="text" class="form-control" id="searchInput" placeholder="Cerca utenti...">
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Card -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 text-center">
+                        <h3 id="totalUsuarios">0</h3>
+                        <p class="text-muted">Total Usuarios</p>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="alert alert-info mb-0">
+                            <i class="fas fa-info-circle mr-2"></i>Gestisci i tuoi utenti da questo pannello. Potere
+                            creare, modificare ed eliminare utenti.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table Card -->
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5><i class="fas fa-table mr-2"></i>Elenco Degli Utenti</h5>
+            </div>
+            <div class="card-body">
+                <!-- Loading Spinner -->
+                <div id="loadingSpinner" class="loading-spinner">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="sr-only">Ricarica...</span>
+                    </div>
+                    <p class="mt-2">Caricamento dati...</p>
+                </div>
+
+                <!-- No Data Message -->
+                <div id="noDataMessage" class="no-data-message">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>Non ci sono utenti registrati.
+                </div>
+
+                <!-- Users Table -->
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Identificazione</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Telefono</th>
+                                <th scope="col">Posta</th>
+                                <th scope="col">Città</th>
+                                <th scope="col">Azioni</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination-container">
+                    <nav>
+                        <ul class="pagination" id="pagination">
+                            <!-- Pagination will be generated here -->
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" role="dialog"
+        aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-confirm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="icon-box">
+                        <i class="fas fa-times"></i>
+                    </div>
+                    <h4 class="modal-title" id="deleteConfirmModalLabel">Sei sicuro?</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Vuoi davvero eliminare questo utente? Questo processo non può essere annullato.</p>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annulla</button>
+                    <button type="button" class="btn btn-danger" id="btnConfirmDelete">Elimina</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery, Popper.js, and Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.1/umd/popper.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/js/bootstrap.min.js"></script>
+
+    <!-- Application JavaScript -->
+    <script>
+        // Variables globales
+        let allUsuarios = [];
+        let currentPage = 1;
+        let itemsPerPage = 10;
+        let userIdToDelete = null;
+
+        // Inicialización
+        window.onload = function () {
+            showLoadingSpinner();
+            actualizarFecha();
+            setInterval(actualizarFecha, 60000);
+            Obtener();
+            setupSearchFilter();
+        };
+
+        // Actualizar fecha y hora
+        function actualizarFecha() {
+            const ahora = new Date();
+            const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+            document.getElementById('fecha-actual').textContent = ahora.toLocaleDateString('es-ES', opciones);
+        }
+
+        // Ir a la página de registro de usuario
+        function IrFormularioCrear() {
+            window.location = "Registro.html";
+        }
+
+        // Configurar filtro de búsqueda
+        function setupSearchFilter() {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('keyup', function () {
+                const searchTerm = this.value.toLowerCase();
+                filterTable(searchTerm);
+            });
+        }
+
+        // Filtrar tabla según término de búsqueda
+        function filterTable(searchTerm) {
+            const filteredUsuarios = allUsuarios.filter(usuario =>
+                usuario.DocumentoIdentidad.toLowerCase().includes(searchTerm) ||
+                usuario.Nombres.toLowerCase().includes(searchTerm) ||
+                usuario.Correo.toLowerCase().includes(searchTerm) ||
+                usuario.Ciudad.toLowerCase().includes(searchTerm)
+            );
+
+            renderTable(filteredUsuarios);
+        }
+
+        // Mostrar spinner de carga
+        function showLoadingSpinner() {
+            document.getElementById('loadingSpinner').style.display = 'block';
+            document.querySelector('.table-responsive').style.display = 'none';
+            document.getElementById('noDataMessage').style.display = 'none';
+        }
+
+        // Ocultar spinner de carga
+        function hideLoadingSpinner() {
+            document.getElementById('loadingSpinner').style.display = 'none';
+            document.querySelector('.table-responsive').style.display = 'block';
+        }
+
+        // Obtener usuarios desde la API
+        function Obtener() {
+            showLoadingSpinner();
+
+            $.get("http://localhost:58683/api/usuario/")
+                .done(function (response) {
+                    console.log(response);
+                    allUsuarios = response;
+                    document.getElementById('totalUsuarios').textContent = allUsuarios.length;
+
+                    if (allUsuarios.length === 0) {
+                        document.getElementById('noDataMessage').style.display = 'block';
+                        document.querySelector('.table-responsive').style.display = 'none';
+                        document.querySelector('.pagination-container').style.display = 'none';
+                    } else {
+                        renderTable(allUsuarios);
+                        setupPagination(allUsuarios);
+                    }
+                })
+                .fail(function (error) {
+                    console.error("Error al obtener usuarios:", error);
+                    document.getElementById('noDataMessage').textContent = "Error al cargar los datos. Por favor, intente nuevamente.";
+                    document.getElementById('noDataMessage').style.display = 'block';
+                    document.querySelector('.table-responsive').style.display = 'none';
+                })
+                .always(function () {
+                    hideLoadingSpinner();
+                });
+        }
+
+        // Renderizar tabla de usuarios
+        function renderTable(usuarios) {
+            const tbody = document.querySelector(".table tbody");
+            tbody.innerHTML = "";
+
+            if (usuarios.length === 0) {
+                document.getElementById('noDataMessage').style.display = 'block';
+                document.querySelector('.table-responsive').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('noDataMessage').style.display = 'none';
+            document.querySelector('.table-responsive').style.display = 'block';
+
+            // Calcular rango para paginación
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = Math.min(startIndex + itemsPerPage, usuarios.length);
+            const paginatedUsuarios = usuarios.slice(startIndex, endIndex);
+
+            paginatedUsuarios.forEach(function (usuario) {
+                const row = document.createElement('tr');
+
+                row.innerHTML = `
+                    <td>${usuario.IdUsuario}</td>
+                    <td>${usuario.DocumentoIdentidad}</td>
+                    <td>${usuario.Nombres}</td>
+                    <td>${usuario.Telefono || '-'}</td>
+                    <td>${usuario.Correo || '-'}</td>
+                    <td>${usuario.Ciudad || '-'}</td>
+                    <td>
+                        <button data-id="${usuario.IdUsuario}" class="btn btn-success btn-sm mr-1 editar">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                        <button data-id="${usuario.IdUsuario}" class="btn btn-danger btn-sm eliminar">
+                            <i class="fas fa-trash-alt"></i> Eliminar
+                        </button>
+                    </td>
+                `;
+
+                tbody.appendChild(row);
+            });
+        }
+
+        // Configurar paginación
+        function setupPagination(usuarios) {
+            const paginationElement = document.getElementById('pagination');
+            paginationElement.innerHTML = '';
+
+            const pageCount = Math.ceil(usuarios.length / itemsPerPage);
+
+            // Anterior
+            const prevLi = document.createElement('li');
+            prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+            prevLi.innerHTML = `<a class="page-link" href="#" aria-label="Previous" ${currentPage === 1 ? 'tabindex="-1"' : ''}>
+                <span aria-hidden="true">&laquo;</span>
+            </a>`;
+            prevLi.addEventListener('click', function (e) {
+                e.preventDefault();
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderTable(usuarios);
+                    setupPagination(usuarios);
+                }
+            });
+            paginationElement.appendChild(prevLi);
+
+            // Páginas
+            for (let i = 1; i <= pageCount; i++) {
+                const li = document.createElement('li');
+                li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+                li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+                li.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    currentPage = i;
+                    renderTable(usuarios);
+                    setupPagination(usuarios);
+                });
+                paginationElement.appendChild(li);
+            }
+
+            // Siguiente
+            const nextLi = document.createElement('li');
+            nextLi.className = `page-item ${currentPage === pageCount ? 'disabled' : ''}`;
+            nextLi.innerHTML = `<a class="page-link" href="#" aria-label="Next" ${currentPage === pageCount ? 'tabindex="-1"' : ''}>
+                <span aria-hidden="true">&raquo;</span>
+            </a>`;
+            nextLi.addEventListener('click', function (e) {
+                e.preventDefault();
+                if (currentPage < pageCount) {
+                    currentPage++;
+                    renderTable(usuarios);
+                    setupPagination(usuarios);
+                }
+            });
+            paginationElement.appendChild(nextLi);
+        }
+
+        // Editar usuario
+        $(document).on('click', '.editar', function () {
+            const userId = $(this).data("id");
+            console.log("Editando usuario con ID:", userId);
+            window.location = "Registro.html?id=" + userId;
+        });
+
+        // Eliminar usuario (mostrar modal de confirmación)
+        $(document).on('click', '.eliminar', function () {
+            userIdToDelete = $(this).data("id");
+            $('#deleteConfirmModal').modal('show');
+        });
+
+        // Confirmar eliminación de usuario
+        $('#btnConfirmDelete').on('click', function () {
+            if (userIdToDelete) {
+                eliminarUsuario(userIdToDelete);
+                $('#deleteConfirmModal').modal('hide');
+            }
+        });
+
+        // Función para eliminar usuario
+        function eliminarUsuario(id) {
+            $.ajax({
+                method: "DELETE",
+                url: "http://localhost:58683/api/usuario/" + id,
+                beforeSend: function () {
+                    showLoadingSpinner();
+                }
+            })
+                .done(function (response) {
+                    console.log(response);
+                    if (response) {
+                        // Mostrar notificación
+                        mostrarNotificacion("¡Usuario eliminado correctamente!", "success");
+                        Obtener();
+                    } else {
+                        mostrarNotificacion("Error al eliminar el usuario", "danger");
+                    }
+                })
+                .fail(function (error) {
+                    console.error("Error al eliminar usuario:", error);
+                    mostrarNotificacion("Error al eliminar el usuario", "danger");
+                });
+        }
+
+        // Mostrar notificación
+        function mostrarNotificacion(mensaje, tipo) {
+            const notificacion = document.createElement('div');
+            notificacion.className = `alert alert-${tipo} alert-dismissible fade show notification-toast`;
+            notificacion.innerHTML = `
+                ${mensaje}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            `;
+
+            // Agregar estilos para posicionar la notificación
+            notificacion.style.position = 'fixed';
+            notificacion.style.top = '20px';
+            notificacion.style.right = '20px';
+            notificacion.style.zIndex = '9999';
+            notificacion.style.minWidth = '300px';
+
+            document.body.appendChild(notificacion);
+
+            // Eliminar después de 5 segundos
+            setTimeout(function () {
+                $(notificacion).alert('close');
+            }, 5000);
+        }
+    </script>
+</body>
+
+</html>
